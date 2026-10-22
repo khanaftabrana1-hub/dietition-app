@@ -9,7 +9,7 @@ export class UserSession {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   phoneNumber: string;
 
   @CreateDateColumn()

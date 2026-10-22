@@ -6,14 +6,14 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   lastName: string;
 
- @Column({ nullable: true })
-country: string;
+  @Column({ nullable: true })
+  country: string;
 
   @Column({ type: 'varchar', nullable: true })
   countryCode: string;
@@ -24,13 +24,13 @@ country: string;
   @Column({ unique: true })
   email: string;
 
-  @Column({ unique: true })
+  @Column({ nullable: true })
   phoneNumber: string;
 
   @Column()
   password: string;
 
-  @Column()
+  @Column({ nullable: true })
   confirmPassword: string;
 
   @Column({ nullable: true })
