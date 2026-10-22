@@ -6,17 +6,17 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  first_name: string;
+  @Column({nullable: true})
+  firstName: string;
 
-  @Column()
-  last_name: string;
+  @Column({nullable: true})
+  lastName: string;
 
-  @Column()
-  country: string;
+ @Column({ nullable: true })
+country: string;
 
   @Column({ type: 'varchar', nullable: true })
-  country_code: string;
+  countryCode: string;
 
   @Column()
   age: number;
@@ -25,13 +25,13 @@ export class User {
   email: string;
 
   @Column({ unique: true })
-  phone_number: string;
+  phoneNumber: string;
 
   @Column()
   password: string;
 
   @Column()
-  confirm_password: string;
+  confirmPassword: string;
 
   @Column({ nullable: true })
   otp?: string;

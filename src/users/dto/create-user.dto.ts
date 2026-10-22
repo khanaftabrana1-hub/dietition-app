@@ -1,11 +1,11 @@
 export class CreateUserDto {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   country: string;
-  country_code: string;
-  phone_number: string;
+  countryCode: string;
+  phoneNumber: string;
   age: number;
   email: string;
   password: string;
-  confirm_password: string;
+  confirmPassword: string;
 }

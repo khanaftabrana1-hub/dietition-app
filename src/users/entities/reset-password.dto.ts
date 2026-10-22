@@ -15,5 +15,5 @@ export class ResetPasswordDto {
 
   @IsNotEmpty()
   @MinLength(6)
-  confirm_password: string;
+  confirmPassword: string;
 }

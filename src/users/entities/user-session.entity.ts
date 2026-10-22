@@ -10,10 +10,10 @@ export class UserSession {
   email: string;
 
   @Column()
-  phone_number: string;
+  phoneNumber: string;
 
   @CreateDateColumn()
-  login_at: Date;
+  loginAt: Date;
 
   @Column({ type: 'text', nullable: true })
   token: string;

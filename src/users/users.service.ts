@@ -25,14 +25,14 @@ export class UsersService {
 
 
   async signup(createUserDto: CreateUserDto) {
-    const { first_name, last_name, country, phone_number, age, email, password, confirm_password } = createUserDto;
+    const { firstName, lastName, country, phoneNumber, age, email, password, confirmPassword } = createUserDto;
 
-    if (password !== confirm_password) {
+    if (password !== confirmPassword) {
       throw new BadRequestException('Password aur Confirm Password match nahi ho rahay!');
     }
 
     const existingUser = await this.userRepository.findOne({
-      where: [{ email }, { phone_number }],
+      where: [{ email }, { phoneNumber }],
     });
 
     if (existingUser) {
@@ -42,15 +42,15 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = this.userRepository.create({
-      first_name,
-      last_name,
+      firstName,
+      lastName,
       country,
-      country_code: createUserDto.country_code,
-      phone_number,
+      countryCode: createUserDto.countryCode,
+      phoneNumber,
       age,
       email,
       password: hashedPassword,
-      confirm_password: hashedPassword,
+      confirmPassword: hashedPassword,
     });
 
     await this.userRepository.save(newUser);
@@ -59,7 +59,7 @@ export class UsersService {
 
   async login(identifier: string, pass: string) {
     const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { phone_number: identifier }],
+      where: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
     if (!user) {
@@ -82,7 +82,7 @@ export class UsersService {
 
     const session = this.userSessionRepository.create({
       email: user.email,
-      phone_number: user.phone_number,
+      phoneNumber: user.phoneNumber,
       token: accessToken,
       expiresAt: expiresAt,
       user: user,
@@ -92,7 +92,7 @@ export class UsersService {
     await this.userSessionRepository.save(session);
 
 
-    const { password, confirm_password, ...userWithoutPassword } = user;
+    const { password, confirmPassword, ...userWithoutPassword } = user;
 
     return {
       message: 'Login kamyab ho gaya!',
@@ -104,7 +104,7 @@ export class UsersService {
 
   async forgotPassword(identifier: string) {
     const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { phone_number: identifier }],
+      where: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
     if (!user) {
@@ -135,7 +135,7 @@ export class UsersService {
       }
     } else {
 
-      console.log(`Sending SMS OTP ${generatedOtp} to: ${user.phone_number}`);
+      console.log(`Sending SMS OTP ${generatedOtp} to: ${user.phoneNumber}`);
     }
 
     return { message: 'OTP apke email/phone par bhej diya gaya hai!' };
@@ -147,15 +147,15 @@ export class UsersService {
 
 
   async resetPassword(dto: ResetPasswordDto) {
-    const { identifier, otp, new_password, confirm_password } = dto;
+    const { identifier, otp, new_password, confirmPassword } = dto;
 
 
-    if (new_password !== confirm_password) {
+    if (new_password !== confirmPassword) {
       throw new BadRequestException('Naya password aur Confirm Password match nahi ho rahay!');
     }
 
     const user = await this.userRepository.findOne({
-      where: [{ email: identifier }, { phone_number: identifier }],
+      where: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
     if (!user) {
@@ -176,7 +176,7 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(new_password, 10);
 
     user.password = hashedPassword;
-    user.confirm_password = hashedPassword;
+    user.confirmPassword = hashedPassword;
     user.otp = undefined;
     user.otpExpires = undefined;
 
@@ -196,11 +196,11 @@ export class UsersService {
 
     // Agar password update ho raha ho toh usay hash kar dein
     if (updateUserDto.password) {
-      if (updateUserDto.password !== updateUserDto.confirm_password) {
+      if (updateUserDto.password !== updateUserDto.confirmPassword) {
         throw new BadRequestException('Password aur Confirm Password match nahi ho rahay!');
       }
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-      updateUserDto.confirm_password = updateUserDto.password;
+      updateUserDto.confirmPassword = updateUserDto.password;
     }
 
     await this.userRepository.update(id, updateUserDto);
