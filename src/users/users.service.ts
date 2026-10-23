@@ -28,7 +28,7 @@ export class UsersService {
     const { firstName, lastName, country, phoneNumber, age, email, password, confirmPassword } = createUserDto;
 
     if (password !== confirmPassword) {
-      throw new BadRequestException('Password aur Confirm Password match nahi ho rahay!');
+      throw new BadRequestException('Password and Confirm Password do not match.');
     }
 
     const existingUser = await this.userRepository.findOne({
@@ -36,7 +36,7 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new BadRequestException('Email ya Phone number pehle se registered hai!');
+      throw new BadRequestException('Email or Phone number is already registered.');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -54,7 +54,7 @@ export class UsersService {
     });
 
     await this.userRepository.save(newUser);
-    return { message: 'Account kamyabi se ban gaya hai!', user: newUser };
+    return { message: 'Account created successfully!', user: newUser };
   }
 
   async login(identifier: string, pass: string) {
@@ -63,12 +63,12 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('Ghalat email/phone number ya password!');
+      throw new UnauthorizedException('Invalid email/phone number or password.');
     }
 
     const isMatch = await bcrypt.compare(pass, user.password);
     if (!isMatch) {
-      throw new UnauthorizedException('Ghalat email/phone number ya password!');
+      throw new UnauthorizedException('Invalid email/phone number or password.');
     }
 
 
@@ -95,7 +95,7 @@ export class UsersService {
     const { password, confirmPassword, ...userWithoutPassword } = user;
 
     return {
-      message: 'Login kamyab ho gaya!',
+      message: 'Login successful!',
       access_token: accessToken,
       user: userWithoutPassword,
     };
@@ -108,7 +108,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('Is email ya phone number par koi account mojood nahi hai!');
+      throw new NotFoundException('No account found with this email or phone number.');
     }
 
 
@@ -131,14 +131,14 @@ export class UsersService {
           html: emailHtml,
         });
       } catch (error) {
-        throw new BadRequestException('Email bhejnay mein masla aya hai, dobara koshish karein.');
+        throw new BadRequestException('Failed to send email. Please try again.');
       }
     } else {
 
       console.log(`Sending SMS OTP ${generatedOtp} to: ${user.phoneNumber}`);
     }
 
-    return { message: 'OTP apke email/phone par bhej diya gaya hai!' };
+    return { message: 'OTP sent to your email/phone number!' };
   }
 
   async resendOtp(identifier: string) {
@@ -151,7 +151,7 @@ export class UsersService {
 
 
     if (new_password !== confirmPassword) {
-      throw new BadRequestException('Naya password aur Confirm Password match nahi ho rahay!');
+      throw new BadRequestException('New password and Confirm Password do not match!');
     }
 
     const user = await this.userRepository.findOne({
@@ -159,17 +159,17 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException('User nahi mila!');
+      throw new NotFoundException('User not found!');
     }
 
     if (user.otp !== otp || !user.otpExpires || user.otpExpires < new Date()) {
-      throw new BadRequestException('Ghalat ya expired OTP hai!');
+      throw new BadRequestException('Invalid or expired OTP!');
     }
 
 
     const isSameAsOld = await bcrypt.compare(new_password, user.password);
     if (isSameAsOld) {
-      throw new BadRequestException('Aap purana password dobara istemal nahi kar saktay, baraye meherbani bilkul naya password lagayein!');
+      throw new BadRequestException('You cannot use your old password again. Please use a different password!');
     }
 
     // 4. Naya password hash karein
@@ -184,38 +184,38 @@ export class UsersService {
 
     await this.userSessionRepository.delete({ user: { id: user.id } });
 
-    return { message: 'Password kamyabi se tabdeel ho gaya hai! Tamam doosri devices se logout kar diya gaya hai.' };
+    return { message: 'Password updated successfully! All other devices have been logged out.' };
   }
 
   // --- Update (Patch) User ---
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User nahi mila!');
+      throw new NotFoundException('User not found!');
     }
 
     // Agar password update ho raha ho toh usay hash kar dein
     if (updateUserDto.password) {
       if (updateUserDto.password !== updateUserDto.confirmPassword) {
-        throw new BadRequestException('Password aur Confirm Password match nahi ho rahay!');
+        throw new BadRequestException('Password and Confirm Password do not match!');
       }
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
       updateUserDto.confirmPassword = updateUserDto.password;
     }
 
     await this.userRepository.update(id, updateUserDto);
-    return { message: 'User profile kamyabi se update ho gayi hai!' };
+    return { message: 'User profile updated successfully!' };
   }
 
   // --- Delete User ---
   async remove(id: string) {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User nahi mila!');
+      throw new NotFoundException('User not found!');
     }
 
     await this.userRepository.delete(id);
-    return { message: 'User kamyabi se delete ho gaya hai!' };
+    return { message: 'User deleted successfully!' };
   }
 
   async logout(token: string) {
@@ -223,13 +223,13 @@ export class UsersService {
     const session = await this.userSessionRepository.findOne({ where: { token } });
 
     if (!session) {
-      throw new UnauthorizedException('Session nahi mila ya pehle hi logout ho chuka hai.');
+      throw new UnauthorizedException('Session not found or already logged out.');
     }
 
     await this.userSessionRepository.remove(session);
 
     return {
-      message: 'Kamyabi se logout ho gaye hain!',
+      message: 'Successfully logged out!',
     };
   }
 }
