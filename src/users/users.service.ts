@@ -10,6 +10,7 @@ import { UserSession } from './entities/user-session.entity.js';
 import { ResetPasswordDto } from './entities/reset-password.dto.js';
 import { UpdateUserDto } from './dto/update-user.dto.js';
 import { getPasswordResetTemplate } from '../common/templates/email.template.js';
+import { isEmail } from 'class-validator';
 
 @Injectable()
 export class UsersService {
@@ -62,13 +63,21 @@ export class UsersService {
       where: [{ email: identifier }, { phoneNumber: identifier }],
     });
 
+    console.log(isEmail(identifier), !user);
+    
+    if(isEmail(identifier) && !user) {
+        throw new UnauthorizedException('Invalid email.');
+      } else if (!user)  {
+        throw new UnauthorizedException('Invalid phone number.');
+      }
+
     if (!user) {
-      throw new UnauthorizedException('Invalid email/phone number or password.');
+      throw new UnauthorizedException('User not registered.');
     }
 
     const isMatch = await bcrypt.compare(pass, user.password);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid email/phone number or password.');
+      throw new UnauthorizedException('Invalid password.');
     }
 
 
